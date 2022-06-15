@@ -1,0 +1,5 @@
+apache-airflow[amazon]
+pyarrow
+pandas
+sqlalchemy
+psycopg2-binary
