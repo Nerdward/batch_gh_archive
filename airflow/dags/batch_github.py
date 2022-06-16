@@ -14,10 +14,10 @@ AIRFLOW_HOME = os.environ.get('AIRFLOW_HOME','/opt/airflow')
 URL_PREFIX = 'https://data.gharchive.org'
 URL_PATH = URL_PREFIX + '/{{ ds }}-{0..23}.json.gz'
 OUTPUT_PATH = AIRFLOW_HOME + '/output-{{ ds }}.json.gz'
-SCRIPT_PATH = "./dags/script/git_batch_script.py"
+SCRIPT_PATH = AIRFLOW_HOME +  "/dags/script/spark.py"
 # TABLE_FORMAT = 'output_{{ dag_run.logical_date.strftime(\'%Y-%m\') }}'
 KEY = 'test/{{ ds }}.json.gz'
-SCRIPT_KEY = 'script/git_batch_script.py'
+SCRIPT_KEY = './script/spark.py'
 BUCKET_NAME = "nerdward-bucket"
 # REDSHIFT_TABLE = 'redshift-cluster-1'
 
@@ -36,7 +36,6 @@ with upload_s3:
     wget_task = BashOperator(
         task_id = 'DownloadToLocal',
         bash_command= f"curl -sSLf {URL_PATH} > {OUTPUT_PATH}"
-        # bash_command = 'echo "{{ ds }} {{ dag_run.logical_date.strftime(\'%Y-%m\') }} "'
     )
 
     upload_task = PythonOperator(
@@ -59,41 +58,10 @@ with upload_s3:
         )
     )
 
-#     create_table = RedshiftSQLOperator(
-#         task_id='create_table',
-#         sql= f"""CREATE TABLE IF NOT EXISTS "{TABLE_FORMAT}" (
-#                 "VendorID" BIGINT, 
-#                 tpep_pickup_datetime TIMESTAMP WITHOUT TIME ZONE, 
-#                 tpep_dropoff_datetime TIMESTAMP WITHOUT TIME ZONE, 
-#                 passenger_count FLOAT(53), 
-#                 trip_distance FLOAT(53), 
-#                 "RatecodeID" FLOAT(53), 
-#                 store_and_fwd_flag TEXT, 
-#                 "PULocationID" BIGINT, 
-#                 "DOLocationID" BIGINT, 
-#                 payment_type BIGINT, 
-#                 fare_amount FLOAT(53), 
-#                 extra FLOAT(53), 
-#                 mta_tax FLOAT(53), 
-#                 tip_amount FLOAT(53), 
-#                 tolls_amount FLOAT(53), 
-#                 improvement_surcharge FLOAT(53), 
-#                 total_amount FLOAT(53), 
-#                 congestion_surcharge FLOAT(53), 
-#                 airport_fee FLOAT(53)
-#             );
-#             """
-#     )
+    remove_file = BashOperator(
+        task_id= 'Remove_File_from_Local',
+        bash_command=f'rm {OUTPUT_PATH}'
+    )
 
-#     insert_to_rds = S3ToRedshiftOperator(
-#         s3_bucket=BUCKET_NAME,
-#         s3_key=KEY,
-#         schema='"public"',
-#         table=f'"{TABLE_FORMAT}"',
-#         copy_options=['parquet'],
-#         task_id='transfer_s3_to_redshift',
-#         aws_conn_id='s3_conn'
-# )
 
-    wget_task >> upload_task 
-    # >> create_table >> insert_to_rds
+    wget_task >> [upload_task ,script_upload_task]
