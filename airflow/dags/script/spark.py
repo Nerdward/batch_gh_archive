@@ -1,4 +1,3 @@
-import pyspark 
 import argparse
 
 from pyspark.sql import SparkSession
@@ -34,10 +33,11 @@ def batch_script(input_path):
 
 
     general_table.write\
-            .format("com.databricks.spark.redshift")\
+            .format("io.github.spark_redshift_community.spark.redshift")\
         .option("url", "jdbc:redshift://dbtredshift.c7adklm4l5cg.us-east-1.redshift.amazonaws.com:5439/dev?user=awsuser&password=Neohakim2000")\
             .option("dbtable", "general_table")\
-        .option("tempdir", "s3://nerdward-bucket/spark_job")\
+        .option("tempdir", "s3://nerdward-bucket/spark_logs")\
+        .option("forward_spark_s3_credentials", 'true')\
         .mode("overwrite")\
         .save()
 
