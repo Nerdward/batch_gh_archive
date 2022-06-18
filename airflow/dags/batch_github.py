@@ -49,11 +49,18 @@ JOB_FLOW_OVERRIDES = {
     'Instances': {
         'InstanceGroups': [
             {
-                'Name': 'Primary node',
+                'Name': 'Master node',
                 'Market': 'SPOT',
                 'InstanceRole': 'MASTER',
                 'InstanceType': 'm4.xlarge',
                 'InstanceCount': 1,
+            },
+            {
+                "Name": "Core - 2",
+                "Market": "SPOT", # Spot instances are a "use as available" instances
+                "InstanceRole": "CORE",
+                "InstanceType": "m4.xlarge",
+                "InstanceCount": 2,
             },
         ],
         "KeepJobFlowAliveWhenNoSteps": True,
@@ -64,9 +71,9 @@ JOB_FLOW_OVERRIDES = {
     'VisibleToAllUsers': True
 }
 
-def upload_to_s3(filename, key, bucket_name):
-    hook = S3Hook('s3_conn')
-    hook.load_file(filename=filename, key=key, bucket_name=bucket_name)
+def upload_to_s3(filename, key):
+    hook = S3Hook()
+    hook.load_file(filename=filename, key=key, bucket_name=BUCKET_NAME, replace=True)
 
 upload_s3 = DAG(
     'Batch_Github_Archives',
@@ -86,8 +93,7 @@ with upload_s3:
         python_callable= upload_to_s3,
         op_kwargs=dict(
             filename = OUTPUT_PATH, 
-            key = KEY, 
-            bucket_name = BUCKET_NAME
+            key = KEY
         )
     )
 
@@ -96,8 +102,7 @@ with upload_s3:
         python_callable= upload_to_s3,
         op_kwargs=dict(
             filename = SCRIPT_PATH, 
-            key = SCRIPT_KEY, 
-            bucket_name = BUCKET_NAME
+            key = SCRIPT_KEY
         )
     )
 
