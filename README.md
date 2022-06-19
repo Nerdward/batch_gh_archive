@@ -9,11 +9,10 @@ send details to the Marketing Team.
   * Traffic per hour
   * Events popularity chart.
 
-For that, you will need:
+### About the Dataset
+[GitHub Archive](https://www.gharchive.org/) is a project to record the public GitHub timeline, archive it, and make it easily accessible for further analysis
 
-* Create a pipeline for processing this dataset and putting it to a datalake
-* Create a pipeline for moving the data from the lake to a data warehouse
-* Transform the data in the data warehouse: prepare it for the dashboard
+### Architecture
 * Create a dashboard
 
 
@@ -25,27 +24,28 @@ The pipeline could be stream or batch: this is the first thing you'll need to de
 * If you want to run things periodically (e.g. hourly/daily), go with batch
 
 
-## Technologies 
+## Technologies / Tools
+* Containerisation: [Docker](https://www.docker.com/)
+* Cloud: [AWS](https://aws.amazon.com/)
+* Infrastructure as code (IaC): [Terraform](https://www.terraform.io/)
+* Workflow orchestration: [Airflow](https://airflow.apache.org/)
+* Data Wareshouse: [Redshift](https://aws.amazon.com/redshift/)
+* Batch processing: [EMR](https://aws.amazon.com/emr/)
+* Visualisation: [Google Data Studio](https://datastudio.google.com/)
 
-* Cloud: AWS.
-* Infrastructure as code (IaC): Terraform.
-* Workflow orchestration: Airflow.
-* Data Wareshouse: Redshift.
-* Batch processing: Spark.
-
+## About the Project
+* Github Archive data is ingested daily into the AWS S3 buckets from 1st of May.
+* A Spark job is run on the data stored in the S3 bucket using AWS ElasticMapReduce (EMR)
+* The results are written to a table defined in Redshift.
+* A dashboard is created from the Redshift tables. 
 
 ## Dashboard
 
 You can build a dashboard with any of the tools shown in the course (Data Studio or Metabase) or any other BI tool of your choice. If you do use another tool, please specify and make sure that the dashboard is somehow accessible to your peers. 
 
-Your dashboard should contain at least two tiles, we suggest you include:
+## Reproducibility
 
-- 1 graph that shows the distribution of some categorical data 
-- 1 graph that shows the distribution of the data across a temporal line
-
-Make sure that your graph is clear to understand by adding references and titles. 
-
-Example of a dashboard: ![image](https://user-images.githubusercontent.com/4315804/159771458-b924d0c1-91d5-4a8a-8c34-f36c25c31a3c.png)
+# Prerequisites.
 
 
 ## Peer review criteria
