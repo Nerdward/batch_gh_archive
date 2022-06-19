@@ -21,11 +21,9 @@ URL_PREFIX = 'https://data.gharchive.org'
 URL_PATH = URL_PREFIX + '/{{ ds }}-{0..23}.json.gz'
 OUTPUT_PATH = AIRFLOW_HOME + '/output-{{ ds }}.json.gz'
 SCRIPT_PATH = AIRFLOW_HOME +  "/dags/script/spark.py"
-# TABLE_FORMAT = 'output_{{ dag_run.logical_date.strftime(\'%Y-%m\') }}'
 KEY = 'test/{{ ds }}.json.gz'
 SCRIPT_KEY = 'script/spark.py'
 BUCKET_NAME = "nerdward-bucket"
-# REDSHIFT_TABLE = 'redshift-cluster-1'
 SPARK_STEPS = [
     {
         "Name": "Batch Process",
@@ -60,7 +58,7 @@ JOB_FLOW_OVERRIDES = {
                 "Market": "SPOT", # Spot instances are a "use as available" instances
                 "InstanceRole": "CORE",
                 "InstanceType": "m4.xlarge",
-                "InstanceCount": 2,
+                "InstanceCount": 1,
             },
         ],
         "KeepJobFlowAliveWhenNoSteps": True,
@@ -77,9 +75,10 @@ def upload_to_s3(filename, key):
 
 upload_s3 = DAG(
     'Batch_Github_Archives',
-    schedule_interval= '0 6 2 * *',
+    schedule_interval= '@daily',
     start_date= datetime(2022, 5, 1),
-    end_date = datetime(2022, 5, 31)
+    end_date = datetime(2022, 5, 7),
+    max_active_runs=3
 )
 
 with upload_s3:
@@ -120,7 +119,7 @@ with upload_s3:
     )
         # Add your steps to the EMR cluster
     step_adder = EmrAddStepsOperator(
-        task_id="Add_Step",
+        task_id="Submitting_Spark_Job",
         job_flow_id="{{ task_instance.xcom_pull(task_ids='Create_EMR_Cluster', key='return_value') }}",
         aws_conn_id="aws_default",
         steps=SPARK_STEPS,
@@ -134,9 +133,9 @@ with upload_s3:
     last_step = len(SPARK_STEPS) - 1 # this value will let the sensor know the last step to watch
     # wait for the steps to complete
     step_checker = EmrStepSensor(
-        task_id="watch_step",
+        task_id="Running_Spark_Job",
         job_flow_id="{{ task_instance.xcom_pull('Create_EMR_Cluster', key='return_value') }}",
-        step_id="{{ task_instance.xcom_pull(task_ids='Add_Step', key='return_value')["
+        step_id="{{ task_instance.xcom_pull(task_ids='Submitting_Spark_Job', key='return_value')["
         + str(last_step)
         + "] }}",
         aws_conn_id="aws_default",
@@ -144,7 +143,7 @@ with upload_s3:
 
         # Terminate the EMR cluster
     terminate_emr_cluster = EmrTerminateJobFlowOperator(
-        task_id="terminate_emr_cluster",
+        task_id="Terminate_EMR_Cluster",
         job_flow_id="{{ task_instance.xcom_pull(task_ids='Create_EMR_Cluster', key='return_value') }}",
         aws_conn_id="aws_default"
     )
