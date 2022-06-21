@@ -40,8 +40,8 @@ The pipeline could be stream or batch: this is the first thing you'll need to de
 * A dashboard is created from the Redshift tables. 
 
 ## Dashboard
+![dashboard](./images/dashboard.png)
 
-You can build a dashboard with any of the tools shown in the course (Data Studio or Metabase) or any other BI tool of your choice. If you do use another tool, please specify and make sure that the dashboard is somehow accessible to your peers. 
 
 ## Reproducibility
 
@@ -203,13 +203,13 @@ Airflow is run in a docker container. This section contains steps on initisialin
     > Both username and password is `airflow`
 #### Run the pipeline
 You are already signed into Airflow. Now it's time to run the pipeline
-1. Click on the DAG `gharchive_dag` that you see there
+1. Click on the DAG `Batch_Github_Archives` that you see there
 2. You should see a tree-like structure of the DAG you're about to run
     ![tree-dag](./images/dag-tree.png)
 3. You can also check the graph structure of the DAG
-    ![graph-dag](./images/dag-graph.png)
+    ![graph-dag](./images/tree_dag.png)
 4. At the top right-hand corner, trigger the DAG. Make sure _Auto-refresh_ is turned on before doing this
-    > The DAG would run from April 1 at 8:00am UTC till 8:00am UTC of the present day  
+    > The DAG would run from May 1 at 12:00am UTC till May 7  
     > This should take a while
 5. While this is going on, check the cloud console to confirm that everything is working accordingly
     > If you face any problem or error, confirm that you have followed all the above instructions religiously. If the problems still persist, raise an issue.
