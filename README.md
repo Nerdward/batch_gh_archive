@@ -45,44 +45,178 @@ You can build a dashboard with any of the tools shown in the course (Data Studio
 
 ## Reproducibility
 
-# Prerequisites.
+### Prerequisites.
 
+#### AWS Platform Account
+1. Create an AWS account if you do not have one. AWS offers free tier for some services like S3, Redshift.
 
-## Peer review criteria
+#### Create an IAM user (optional but advised)
 
-* Problem description
-    * 0 points: Problem is not described
-    * 1 point: Problem is described but shortly or not clearly 
-    * 2 points: Problem is well described and it's clear what the problem the project solves
-* Cloud
-    * 0 points: Cloud is not used, things run only locally
-    * 2 points: The project is developed on the cloud
-    * 4 points: The project is developed on the clound and IaC tools are used
-* Data ingestion (choose either batch or stream)
-    * Batch / Workflow orchestration
-        * 0 points: No workflow orchestration
-        * 2 points: Partial workflow orchestration: some steps are orchestrated, some run manually
-        * 4 points: End-to-end pipeline: multiple steps in the DAG, uploading data to data lake
-    * Stream
-        * 0 points: No streaming system (like Kafka, Pulsar, etc)
-        * 2 points: A simple pipeline with one consumer and one producer
-        * 4 points: Using consumer/producers and streaming technologies (like Kafka streaming, Spark streaming, Flink, etc)
-* Data warehouse
-    * 0 points: No DWH is used
-    * 2 points: Tables are created in DWH, but not optimized
-    * 4 points: Tables are partitioned and clustered in a way that makes sense for the upstream queries (with explanation)
-* Transformations (dbt, spark, etc)
-    * 0 points: No tranformations
-    * 2 points: Simple SQL transformation (no dbt or similar tools)
-    * 4 points: Tranformations are defined with dbt, Spark or similar technologies
-* Dashboard
-    * 0 points: No dashboard
-    * 2 points: A dashboard with 1 tile
-    * 4 points: A dashboard with 2 tiles
-* Reproducibility
-    * 0 points: No instructions how to run code at all
-    * 2 points: Some instructions are there, but they are not complete
-    * 4 points: Instructions are clear, it's easy to run the code, and the code works
+1. Open the IAM console [here](https://console.aws.amazon.com/iam/)
+2. In the navigation pane, choose Users and then choose Add users. More information [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
+3. Select Programmatic access, For console password, create custom password.
+4. On the Set permissions page, Attach AdministratorAccess policy.
+5. Download credentials.csv file with login information and store it in `${HOME}/.aws/credentials.csv`
+
+### Pre-Infrastructure Setup
+
+Terraform is used to setup most of the services used for this project i.e S3 buckets, Redshift cluster. This section contains step to setup these aspects of the project.
+
+#### Setting up a Virtual Machine
+You can use any virtual machine of your choice; Azure, GCP etc..
+But AWS EC2 is preferable because of faster upload and download speeds to AWS services.
+To set up an AWS EC2 vm that works for this project, you will need to pay for it. Here is a [link](https://www.guru99.com/creating-amazon-ec2-instance.html) to help. Ubuntu OS is preferable.
+
+#### AWS CLI
+To download and set up AWS cli
+```
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+```
+
+#### AWS credentials
+1. To configure aws credentials run 
+```
+$ aws configure
+AWS Access Key ID [None]: fill with value from credentials.csv
+AWS Secret Access Key [None]: fill with value from fill with value from credentials.csv
+Default region name [None]: your regiion
+Default output format [None]: json
+```
+
+##### Docker
+1. Connect to your VM
+2. Install Docker
+    ```bash
+    sudo apt-get update
+    sudo apt-get install docker.io
+    ```
+3. Docker needs to be configured so that it can run without `sudo`
+    ```bash
+    sudo groupadd docker
+    sudo gpasswd -a $USER docker
+    sudo service docker restart
+    ```
+    - Logout of your SSH session and log back in
+    - Test that docker works successfully by running `docker run hello-world`
+##### Docker-Compose
+1. Check and copy the latest release for Linux from the official Github [repository](https://github.com/docker/compose)
+2. Create a folder called `bin/` in the home directory. Navigate into the `/bin` directory and download the binary file there
+    ```bash
+    wget <copied-file> -O docker-compose
+    ```
+3. Make the file executable 
+    ```bash
+    chmod +x docker-compose
+    ```
+4. Add the `.bin/` directory to PATH permanently
+    - Open the `.bashrc` file in the HOME directory
+    ```bash
+    nano .bashrc
+    ```
+    - Go to the end of the file and paste this there 
+    ```bash
+    export PATH="${HOME}/bin:${PATH}"
+    ```
+    - Save the file (_CTRL-O_) and exit nano (_CTRL-X_)
+    - Reload the PATH variable
+    ```bash
+    source .bashrc
+    ```
+5. You should be able to run docker-compose from anywhere now. Test this with `docker-compose --version`
+##### Terraform
+1. Navigate to the `bin/` directory that you created and run this
+    ```bash
+    wget https://releases.hashicorp.com/terraform/1.1.7/terraform_1.1.7_linux_amd64.zip
+    ```
+2. Unzip the file
+    ```bash
+    unzip terraform_1.1.7_linux_amd64.zip
+    ```
+    > You might have to install unzip `sudo apt-get install unzip`
+3. Remove the zip file
+    ```bash
+    rm terraform_1.1.7_linux_amd64.zip
+    ```
+4. Terraform is already installed. Test it with `terraform -v`
+
+##### Remote-SSH
+To work with folders on a remote machine on Visual Studio Code, you need this extension. This extension also simplifies the forwarding of ports.
+1. Install the Remote-SSH extension from the Extensions Marketplace
+2. At the bottom left-hand corner, click the _Open a Remote Window_ icon
+3. Click _Connect to Host_. Click the name of your config file host.
+4. In the _Explorer_ tab, open any folder on your Virtual Machine
+Now, you can use VSCode completely to run this project.
+
+<p align="right"><a href="#index">back to index</a></p>
+
+### Main
+
+#### Clone the repository
+```bash
+    git clone https://github.com/Nerdward/batch_gh_archive
+```
+#### Create remaining infrastructure with Terraform
+We use Terraform to create a S3 bucket and Redshift
+1. Navigate to the [terraform](./terraform/) folder
+2. Initialise terraform
+    ```bash
+    terraform init
+    ```
+3. Check infrastructure plan
+    ```bash
+    terraform plan
+    ```
+4. Create new infrastructure
+    ```bash
+    terraform apply
+    ```
+5. Confirm that the infrastructure has been created on the GCP dashboard
+#### Initialise Airflow
+Airflow is run in a docker container. This section contains steps on initisialing Airflow resources
+1. Navigate to the [airflow](./airflow/) folder
+2. Create a logs folder `airflow/logs/`
+    ```bash
+    mkdir logs/
+    ```
+3. Build the docker image
+    ```bash
+    docker-compose build
+    ```
+4. The names of some project resources are hardcoded in the [docker_compose.yaml](./airflow/docker-compose.yaml) file. Change this values to suit your use-case
+    ![hardcoded-values](./images/hardcoded-values.png)
+5. Initialise Airflow resources
+    ```bash
+    docker-compose up airflow-init
+    ```
+6. Kick up all other services
+    ```bash
+    docker-compose up
+    ```
+7. Open another terminal instance and check docker running services
+    ```bash
+    docker ps
+    ```
+    - Check if all the services are healthy
+8. Forward port **8080** from VS Code. Open `localhost:8080` on your browser and sign into airflow
+    > Both username and password is `airflow`
+#### Run the pipeline
+You are already signed into Airflow. Now it's time to run the pipeline
+1. Click on the DAG `gharchive_dag` that you see there
+2. You should see a tree-like structure of the DAG you're about to run
+    ![tree-dag](./images/dag-tree.png)
+3. You can also check the graph structure of the DAG
+    ![graph-dag](./images/dag-graph.png)
+4. At the top right-hand corner, trigger the DAG. Make sure _Auto-refresh_ is turned on before doing this
+    > The DAG would run from April 1 at 8:00am UTC till 8:00am UTC of the present day  
+    > This should take a while
+5. While this is going on, check the cloud console to confirm that everything is working accordingly
+    > If you face any problem or error, confirm that you have followed all the above instructions religiously. If the problems still persist, raise an issue.
+6. When the pipeline is finished and you've confirmed that everything went well, shut down **docker-compose* with _CTRL-C_ and kill all containers with `docker-compose down`
+7. Take a well-deserved break to rest. This has been a long ride.
+
+<p align="right"><a href="#index">back to index</a></p>
 
 
 ## Going the extra mile 
