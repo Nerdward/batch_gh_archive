@@ -172,7 +172,7 @@ We use Terraform to create a S3 bucket and Redshift
     ```bash
     terraform apply
     ```
-5. Confirm that the infrastructure has been created on the GCP dashboard
+5. Confirm that the infrastructure has been created on the AWS console.
 #### Initialise Airflow
 Airflow is run in a docker container. This section contains steps on initisialing Airflow resources
 1. Navigate to the [airflow](./airflow/) folder
