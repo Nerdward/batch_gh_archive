@@ -160,6 +160,17 @@ Now, you can use VSCode completely to run this project.
 #### Create remaining infrastructure with Terraform
 We use Terraform to create a S3 bucket and Redshift
 1. Navigate to the [terraform](./terraform/) folder
+
+    > change the name of the variables to suit your project type.
+    ![variables](images/variables.png)
+
+    > set the username and password for your redshift cluster using this
+     ```
+    # Set secrets via environment variables
+    export TF_VAR_username=(the username)
+    export TF_VAR_password=(the password)
+    ```
+
 2. Initialise terraform
     ```bash
     terraform init
@@ -172,7 +183,7 @@ We use Terraform to create a S3 bucket and Redshift
     ```bash
     terraform apply
     ```
-5. Confirm that the infrastructure has been created on the AWS console.
+5. Confirm that the infrastructure has been created on the AWS console.batch_gh_archive
 #### Initialise Airflow
 Airflow is run in a docker container. This section contains steps on initisialing Airflow resources
 1. Navigate to the [airflow](./airflow/) folder
@@ -205,13 +216,14 @@ Airflow is run in a docker container. This section contains steps on initisialin
 You are already signed into Airflow. Now it's time to run the pipeline
 1. Click on the DAG `Batch_Github_Archives` that you see there
 2. You should see a tree-like structure of the DAG you're about to run
-    ![tree-dag](./images/dag-tree.png)
+    ![tree-dag](./images/tree.png)
 3. You can also check the graph structure of the DAG
     ![graph-dag](./images/tree_dag.png)
 4. At the top right-hand corner, trigger the DAG. Make sure _Auto-refresh_ is turned on before doing this
     > The DAG would run from May 1 at 12:00am UTC till May 7  
     > This should take a while
-5. While this is going on, check the cloud console to confirm that everything is working accordingly
+5. While this is going on, check the AWS console to confirm that everything is working accordingly
+    > The EMR clusters should be starting up ![emr](./images/emr.png)
     > If you face any problem or error, confirm that you have followed all the above instructions religiously. If the problems still persist, raise an issue.
 6. When the pipeline is finished and you've confirmed that everything went well, shut down **docker-compose* with _CTRL-C_ and kill all containers with `docker-compose down`
 7. Take a well-deserved break to rest. This has been a long ride.

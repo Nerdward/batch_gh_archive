@@ -62,6 +62,9 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     AWS_SHARED_CREDENTIALS_FILE: /opt/airflow/.aws/credentials
+    S3_BUCKET: "nerdward-github-archive"
+    REDSHIFT_CLUSTER: 'reshift_cluster_1'
+
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

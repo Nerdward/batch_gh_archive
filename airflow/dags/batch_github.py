@@ -23,7 +23,10 @@ OUTPUT_PATH = AIRFLOW_HOME + '/output-{{ ds }}.json.gz'
 SCRIPT_PATH = AIRFLOW_HOME +  "/dags/script/spark.py"
 KEY = 'test/{{ ds }}.json.gz'
 SCRIPT_KEY = 'script/spark.py'
-BUCKET_NAME = "nerdward-bucket"
+BUCKET_NAME = os.environ.get('S3_BUCKET')
+REDSHIFT_CLUSTER = os.environ.get('REDSHIFT_CLUSTER')
+
+
 SPARK_STEPS = [
     {
         "Name": "Batch Process",
