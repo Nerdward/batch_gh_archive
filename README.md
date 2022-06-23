@@ -196,6 +196,7 @@ Airflow is run in a docker container. This section contains steps on initisialin
     docker-compose build
     ```
 4. The names of some project resources are hardcoded in the [docker_compose.yaml](./airflow/docker-compose.yaml) file. Change this values to suit your use-case
+
     ![hardcoded-values](./images/hardcoded-values.png)
 5. Initialise Airflow resources
     ```bash
