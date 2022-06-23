@@ -3,7 +3,7 @@ import argparse
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-def batch_script(input_path):
+def batch_script(input_path, bucket_name, password):
     spark = SparkSession.builder\
             .appName('Batch_Github')\
             .getOrCreate()
@@ -34,18 +34,18 @@ def batch_script(input_path):
 
     general_table.write\
         .format("io.github.spark_redshift_community.spark.redshift")\
-        .option("url", "jdbc:redshift://dbtredshift.c7adklm4l5cg.us-east-1.redshift.amazonaws.com:5439/dev?user=awsuser&password=Neohakim2000")\
+        .option("url", f"jdbc:redshift://dbtredshift.c7adklm4l5cg.us-east-1.redshift.amazonaws.com:5439/dev?user=awsuser&password={password}")\
         .option("dbtable", "general_table")\
-        .option("tempdir", "s3://nerdward-bucket/spark_logs")\
+        .option("tempdir", f"s3://{bucket_name}/spark_logs")\
         .option("forward_spark_s3_credentials", 'true')\
         .mode("append")\
         .save()
 
     event_count_table.write\
             .format("io.github.spark_redshift_community.spark.redshift")\
-            .option("url", "jdbc:redshift://dbtredshift.c7adklm4l5cg.us-east-1.redshift.amazonaws.com:5439/dev?user=awsuser&password=Neohakim2000")\
+            .option("url", f"jdbc:redshift://dbtredshift.c7adklm4l5cg.us-east-1.redshift.amazonaws.com:5439/dev?user=awsuser&password={password}")\
             .option("dbtable", "event_count_table")\
-            .option("tempdir", "s3://nerdward-bucket/spark_logs")\
+            .option("tempdir", f"s3://{bucket_name}/spark_logs")\
             .option("forward_spark_s3_credentials", 'true')\
             .mode("append")\
             .save()
@@ -53,6 +53,9 @@ def batch_script(input_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input',required=True, type=str)
+    parser.add_argument('--bucket',required=True, type=str)
+    parser.add_argument('--password',required=True, type=str)
+
 
     args = parser.parse_args()
-    batch_script(args.input)
+    batch_script(args.input, args.bucket, args.password)

@@ -224,6 +224,7 @@ You are already signed into Airflow. Now it's time to run the pipeline
     > This should take a while
 5. While this is going on, check the AWS console to confirm that everything is working accordingly
     > The EMR clusters should be starting up ![emr](./images/emr.png)
+
     > If you face any problem or error, confirm that you have followed all the above instructions religiously. If the problems still persist, raise an issue.
 6. When the pipeline is finished and you've confirmed that everything went well, shut down **docker-compose* with _CTRL-C_ and kill all containers with `docker-compose down`
 7. Take a well-deserved break to rest. This has been a long ride.
@@ -233,18 +234,12 @@ You are already signed into Airflow. Now it's time to run the pipeline
 
 ## Going the extra mile 
 
-If you finish the project and you want to improve it, here are a few things you can do:
+Here are a few things I can do:
 
 * Add tests
 * Use make
 * Add CI/CD pipeline 
 
-This is not covered in the course and this is entirely optional.
-
-If you plan to use this project as your portfolio project, it'll 
-definitely help you to stand out from others.
-
-> **Note**: this part will not be graded. 
 
 
 Some links to refer to:

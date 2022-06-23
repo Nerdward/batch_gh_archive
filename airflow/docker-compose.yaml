@@ -64,6 +64,7 @@ x-airflow-common:
     AWS_SHARED_CREDENTIALS_FILE: /opt/airflow/.aws/credentials
     S3_BUCKET: "nerdward-github-archive"
     REDSHIFT_CLUSTER: 'reshift_cluster_1'
+    REDSHIFT_PASSWORD: #type in redshift password
 
   volumes:
     - ./dags:/opt/airflow/dags
